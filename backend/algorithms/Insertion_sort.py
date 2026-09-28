@@ -1,6 +1,6 @@
 def insertion_sort(lista):
     """
-    Ordenamiento por Inserción.
+    Ordenamiento por Inserción
     Complejidad: O(N^2)
     """
     arr = lista.copy()

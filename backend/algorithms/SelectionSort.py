@@ -1,5 +1,5 @@
 def selection_sort(lista):
-	"""Ordena una lista usando Selection Sort."""
+	"""Ordena una lista usando Selection Sort"""
 	n = len(lista)
 	for i in range(n):
 		minimo = i

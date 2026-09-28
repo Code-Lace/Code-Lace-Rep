@@ -1,6 +1,6 @@
 def exchange_sort(lista):
     """
-    Ordenamiento por Intercambio Directo (Exchange Sort).
+    Ordenamiento por Intercambio Directo (Exchange Sort)
     Complejidad: O(N^2)
     """
     arr = lista.copy()

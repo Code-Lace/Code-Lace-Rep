@@ -1,5 +1,5 @@
 def bubble_sort(lista):
-	"""Ordena una lista usando Bubble Sort."""
+	"""Ordena una lista usando Bubble Sort"""
 	n = len(lista)
 	for i in range(n):
 		for j in range(0, n - i - 1):
