@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SortViz - Algoritmos de Ordenamiento</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-root">
+    <!-- Decoraciones de fondo -->
+    <div class="bg-decoration bg-dec-1"></div>
+    <div class="bg-decoration bg-dec-2"></div>
+    <div class="bg-decoration bg-dec-3"></div>
+
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" class="deco-sparkle deco-s1 text-purple-700">
+      <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
+    </svg>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="deco-sparkle deco-s2 text-purple-500">
+      <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
+    </svg>
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="deco-sparkle deco-s3 text-fuchsia-500">
+      <path d="M5 0L5.8 4.2L10 5L5.8 5.8L5 10L4.2 5.8L0 5L4.2 4.2L5 0Z" fill="currentColor" />
+    </svg>
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="deco-sparkle deco-s4 text-violet-400">
+      <path d="M5 0L5.8 4.2L10 5L5.8 5.8L5 10L4.2 5.8L0 5L4.2 4.2L5 0Z" fill="currentColor" />
+    </svg>
+
+    <!-- Menú Lateral (Sidebar) -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop hidden" onclick="toggleSidebar(false)"></div>
+    <aside id="sidebar" class="sidebar sidebar-closed">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="text-purple-200">
+            <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
+          </svg>
+        </div>
+        <div>
+          <div class="sidebar-logo-title">SortViz</div>
+          <div class="sidebar-logo-sub">Algoritmos de Ordenamiento</div>
+        </div>
+        <button class="sidebar-close-btn" onclick="toggleSidebar(false)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
+
+      <div class="sidebar-footer">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="text-purple-400">
+          <path d="M5 0L5.8 4.2L10 5L5.8 5.8L5 10L4.2 5.8L0 5L4.2 4.2L5 0Z" fill="currentColor" />
+        </svg>
+        <span>SortViz v1.0</span>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="text-purple-400">
+          <path d="M5 0L5.8 4.2L10 5L5.8 5.8L5 10L4.2 5.8L0 5L4.2 4.2L5 0Z" fill="currentColor" />
+        </svg>
+      </div>
+    </aside>
+
+    <!-- Contenedor Principal -->
+    <div class="main-wrapper">
+      <!-- Barra Superior (TopBar) -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" onclick="toggleSidebar()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-logo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-purple-300">
+              <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
+            </svg>
+            <span>SortViz</span>
+          </div>
+        </div>
+
+        <div class="topbar-tabs">
+          <button id="tab-dashboard" class="topbar-tab topbar-tab-active" onclick="switchView('dashboard')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 3v18h18" />
+              <path d="m19 9-5 5-4-4-3 3" />
+            </svg>
+            Comparativa
+          </button>
+          <button id="tab-visualizer" class="topbar-tab" onclick="switchView('visualizer')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 9h18M9 21V9" />
+            </svg>
+            Visualizador
+          </button>
+        </div>
+
+        <div id="topbar-right-dashboard" class="topbar-right topbar-right-info">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-purple-400">
+            <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
+          </svg>
+          <span>8 algoritmos comparados</span>
+        </div>
+
+        <div id="topbar-right-visualizer" class="topbar-right hidden">
+          <div id="algo-quickselect" class="algo-quickselect"></div>
+        </div>
+      </header>
+
+      <!-- Contenido Principal -->
+      <main class="main-content">
+        <!-- VISTA INICIAL: DASHBOARD (Comparativa de Algoritmos) -->
+        <div id="view-dashboard" class="dashboard-grid">
+          <div class="dashboard-header">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-purple-300">
+              <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
+            </svg>
+            <h2 class="dashboard-title">Comparativa de Algoritmos</h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-purple-300">
+              <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
+            </svg>
+          </div>
+
+          <!-- Tarjetas de Algoritmos -->
+          <div id="algo-cards-grid" class="algo-cards-grid"></div>
+
+          <!-- Gráfico de Barras -->
+          <div class="chart-card">
+            <h3 class="chart-title">Operaciones Estimadas (n=20, promedio)</h3>
+            <div class="chart-container" id="bar-chart-container"></div>
+          </div>
+
+          <!-- Gráfico de Radar -->
+          <div class="chart-card">
+            <h3 class="chart-title">Eficiencia Global (mayor = mejor)</h3>
+            <div class="chart-container" id="radar-chart-container"></div>
+          </div>
+
+          <!-- Tabla de Complejidades -->
+          <div class="chart-card complexity-table-card">
+            <h3 class="chart-title">Tabla de Complejidades</h3>
+            <div class="table-wrapper">
+              <table class="complexity-table">
+                <thead>
+                  <tr>
+                    <th>Algoritmo</th>
+                    <th>Categoría</th>
+                    <th>Mejor Caso</th>
+                    <th>Caso Promedio</th>
+                    <th>Peor Caso</th>
+                    <th>Espacio</th>
+                  </tr>
+                </thead>
+                <tbody id="complexity-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA SECUNDARIA: VISUALIZADOR INTERACTIVO -->
+        <div id="view-visualizer" class="visualizer-layout hidden">
+          <div class="info-panel">
+            <div class="info-panel-header">
+              <span id="viz-info-dot" class="info-dot"></span>
+              <div>
+                <h2 id="viz-algo-name" class="info-algo-name"></h2>
+                <span id="viz-algo-badge"></span>
+              </div>
+            </div>
+
+            <p id="viz-algo-desc" class="info-description"></p>
+
+            <div class="complexity-grid">
+              <div class="complexity-row">
+                <span class="complexity-label">Mejor</span>
+                <code id="viz-best" class="complexity-value"></code>
+              </div>
+              <div class="complexity-row">
+                <span class="complexity-label">Promedio</span>
+                <code id="viz-avg" class="complexity-value"></code>
+              </div>
+              <div class="complexity-row">
+                <span class="complexity-label">Peor</span>
+                <code id="viz-worst" class="complexity-value"></code>
+              </div>
+              <div class="complexity-row">
+                <span class="complexity-label">Espacio</span>
+                <code id="viz-space" class="complexity-value"></code>
+              </div>
+            </div>
+
+            <div id="viz-stooge-warning" class="stooge-warning hidden">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="text-yellow-400">
+                <path d="M5 0L5.8 4.2L10 5L5.8 5.8L5 10L4.2 5.8L0 5L4.2 4.2L5 0Z" fill="currentColor" />
+              </svg>
+              <span id="viz-stooge-text"></span>
+            </div>
+
+            <div class="step-counter">
+              <span>Paso</span>
+              <span id="viz-step-current" class="step-number">0</span>
+              <span>de</span>
+              <span id="viz-step-total" class="step-number">0</span>
+            </div>
+
+            <div class="progress-track">
+              <div id="viz-progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+
+            <div class="legend">
+              <div class="legend-item">
+                <span class="legend-dot" style="background: #06b6d4"></span>
+                <span>Comparando</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot" style="background: #f97316"></span>
+                <span>Intercambiando</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot" style="background: #4ade80"></span>
+                <span>Ordenado</span>
+              </div>
+              <div class="legend-item">
+                <span id="viz-legend-normal" class="legend-dot"></span>
+                <span>Normal</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="viz-area">
+            <div id="viz-done-badge" class="done-badge hidden">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
+              </svg>
+              ¡Ordenamiento completado!
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
+              </svg>
+            </div>
+
+            <div id="bars-container" class="bars-container"></div>
+
+            <div class="controls-panel">
+              <div class="controls-row">
+                <button class="btn btn-primary" onclick="handleGenerate()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                    <path d="M21 3v5h-5" />
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                    <path d="M8 16H3v5" />
+                  </svg>
+                  Generar
+                </button>
+
+                <button id="btn-step-back" class="btn btn-ghost" onclick="handleStepBack()" disabled>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m15 18-6-6 6-6" />
+                  </svg>
+                </button>
+
+                <button id="btn-play-pause" class="btn btn-play" onclick="handlePlayPause()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5,3 19,12 5,21" />
+                  </svg>
+                  Iniciar
+                </button>
+
+                <button id="btn-step-forward" class="btn btn-ghost" onclick="handleStepForward()" disabled>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </button>
+
+                <button id="btn-reset" class="btn btn-ghost" onclick="handleReset()" disabled>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                    <path d="M21 3v5h-5" />
+                  </svg>
+                  Reiniciar
+                </button>
+              </div>
+
+              <div class="controls-sliders">
+                <div class="slider-group">
+                  <label class="slider-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                    Velocidad
+                  </label>
+                  <input id="slider-speed" type="range" min="10" max="500" value="430" class="slider" oninput="handleSpeedChange(this.value)" />
+                  <span id="slider-speed-label" class="slider-value">Normal</span>
+                </div>
+
+                <div class="slider-group">
+                  <label class="slider-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="7" height="7" />
+                      <rect x="14" y="3" width="7" height="7" />
+                      <rect x="14" y="14" width="7" height="7" />
+                      <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    <span id="slider-size-label">Tamaño: 30</span>
+                  </label>
+                  <input id="slider-size" type="range" min="5" max="35" value="30" class="slider" oninput="handleSizeChange(this.value)" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Tooltip Flotante para Gráficas -->
+  <div id="chart-tooltip" class="chart-tooltip hidden"></div>
+
+  <script>
+    const ALGORITHMS = [
+      {
+        id: "merge",
+        name: "Merge Sort",
+        nameShort: "Merge",
+        category: "divide-conquer",
+        bestCase: "Ω(n log n)",
+        avgCase: "Θ(n log n)",
+        worstCase: "O(n log n)",
+        space: "O(n)",
+        description: "Divide el arreglo a la mitad recursivamente y combina las mitades ordenadas.",
+        color: "#a855f7"
+      },
+      {
+        id: "quick",
+        name: "Quick Sort",
+        nameShort: "Quick",
+        category: "divide-conquer",
+        bestCase: "Ω(n log n)",
+        avgCase: "Θ(n log n)",
+        worstCase: "O(n²)",
+        space: "O(log n)",
+        description: "Elige un pivote, particiona el arreglo y ordena las particiones recursivamente.",
+        color: "#c084fc"
+      },
+      {
+        id: "selection",
+        name: "Selection Sort",
+        nameShort: "Selection",
+        category: "brute-force",
+        bestCase: "Ω(n²)",
+        avgCase: "Θ(n²)",
+        worstCase: "O(n²)",
+        space: "O(1)",
+        description: "Busca el mínimo en la parte no ordenada y lo coloca en su posición correcta.",
+        color: "#f97316"
+      },
+      {
+        id: "bubble",
+        name: "Bubble Sort",
+        nameShort: "Bubble",
+        category: "brute-force",
+        bestCase: "Ω(n)",
+        avgCase: "Θ(n²)",
+        worstCase: "O(n²)",
+        space: "O(1)",
+        description: "Compara pares adyacentes repetidamente e intercambia si están en orden incorrecto.",
+        color: "#fb923c"
+      },
+      {
+        id: "insertion",
+        name: "Insertion Sort",
+        nameShort: "Insertion",
+        category: "brute-force",
+        bestCase: "Ω(n)",
+        avgCase: "Θ(n²)",
+        worstCase: "O(n²)",
+        space: "O(1)",
+        description: "Construye la parte ordenada insertando cada elemento en su posición correcta.",
+        color: "#f59e0b"
+      },
+      {
+        id: "gnome",
+        name: "Gnome Sort",
+        nameShort: "Gnome",
+        category: "brute-force",
+        bestCase: "Ω(n)",
+        avgCase: "Θ(n²)",
+        worstCase: "O(n²)",
+        space: "O(1)",
+        description: "Similar a Insertion Sort pero mueve elementos hacia atrás usando intercambios.",
+        color: "#10b981"
+      },
+      {
+        id: "exchange",
+        name: "Exchange Sort",
+        nameShort: "Exchange",
+        category: "brute-force",
+        bestCase: "Ω(n²)",
+        avgCase: "Θ(n²)",
+        worstCase: "O(n²)",
+        space: "O(1)",
+        description: "Compara cada elemento con todos los siguientes e intercambia si es necesario.",
+        color: "#06b6d4"
+      },
+      {
+        id: "stooge",
+        name: "Stooge Sort",
+        nameShort: "Stooge",
+        category: "brute-force",
+        bestCase: "Ω(n^2.71)",
+        avgCase: "Θ(n^2.71)",
+        worstCase: "O(n^2.71)",
+        space: "O(n)",
+        description: "Algoritmo recursivo muy ineficiente que ordena solapando tres partes del arreglo.",
+        color: "#e879f9",
+        maxSize: 12
+      }
+    ];
+
+    const COMPLEXITY_CHART_DATA = [
+      { name: "Merge", best: 86, avg: 86, worst: 86 },
+      { name: "Quick", best: 86, avg: 86, worst: 400 },
+      { name: "Insertion", best: 20, avg: 200, worst: 400 },
+      { name: "Gnome", best: 20, avg: 200, worst: 400 },
+      { name: "Selection", best: 400, avg: 400, worst: 400 },
+      { name: "Bubble", best: 20, avg: 400, worst: 400 },
+      { name: "Exchange", best: 400, avg: 400, worst: 400 },
+      { name: "Stooge", best: 800, avg: 800, worst: 800 }
+    ];
+
+    const RADAR_DATA = [
+      { subject: "Mejor Caso", Merge: 95, Quick: 92, Bubble: 60, Stooge: 10 },
+      { subject: "Caso Promedio", Merge: 90, Quick: 88, Bubble: 35, Stooge: 5 },
+      { subject: "Peor Caso", Merge: 90, Quick: 60, Bubble: 35, Stooge: 5 },
+      { subject: "Memoria", Merge: 60, Quick: 85, Bubble: 100, Stooge: 70 }
+    ];
+
+    let activeView = "dashboard";
+    let selectedAlgoId = "bubble";
+    let arraySize = 30;
+    let speed = 80;
+    let steps = [];
+    let stepIdx = 0;
+    let isPlaying = false;
+    let intervalId = null;
+    let currentArray = [];
+
+    function badgeHTML(category) {
+      return category === "divide-conquer"
+        ? '<span class="badge-dv">Divide y Vencerás</span>'
+        : '<span class="badge-fb">Fuerza Bruta</span>';
+    }
+
+    function renderDashboard() {
+      // Tarjetas
+      const cardsGrid = document.getElementById("algo-cards-grid");
+      cardsGrid.innerHTML = ALGORITHMS.map(algo => `
+        <div class="algo-card" style="border-color: ${algo.color}55" onclick="selectAlgoAndOpenVisualizer('${algo.id}')">
+          <div class="algo-card-dot" style="background: ${algo.color}; color: ${algo.color}"></div>
+          <div>
+            <div class="algo-card-name">${algo.name}</div>
+            ${badgeHTML(algo.category)}
+            <div class="algo-card-complexity">${algo.avgCase}</div>
+          </div>
+        </div>
+      `).join("");
+
+      // Tabla
+      const tbody = document.getElementById("complexity-table-body");
+      tbody.innerHTML = ALGORITHMS.map(algo => `
+        <tr onclick="selectAlgoAndOpenVisualizer('${algo.id}')" style="cursor: pointer;">
+          <td>
+            <span class="table-algo-dot" style="background: ${algo.color}"></span>
+            ${algo.name}
+          </td>
+          <td>${badgeHTML(algo.category)}</td>
+          <td><code>${algo.bestCase}</code></td>
+          <td><code>${algo.avgCase}</code></td>
+          <td><code>${algo.worstCase}</code></td>
+          <td><code>${algo.space}</code></td>
+        </tr>
+      `).join("");
+
+      renderBarChart();
+      renderRadarChart();
+    }
+
+    function renderBarChart() {
+      const container = document.getElementById("bar-chart-container");
+      const width = 560, height = 260;
+      const padLeft = 42, padRight = 20, padTop = 12, padBottom = 52;
+      const plotW = width - padLeft - padRight;
+      const plotH = height - padTop - padBottom;
+      const maxVal = 800;
+      const yTicks = [0, 200, 400, 600, 800];
+      const groupW = plotW / COMPLEXITY_CHART_DATA.length;
+      const barW = 11;
+
+      let svg = `<svg viewBox="0 0 ${width} ${height}" class="recharts-svg">`;
+
+      // Grid lines & Y axis
+      yTicks.forEach(t => {
+        const y = padTop + plotH - (t / maxVal) * plotH;
+        svg += `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" stroke="rgba(168,85,247,0.15)" stroke-dasharray="3 3" />`;
+        svg += `<text x="${padLeft - 6}" y="${y + 4}" text-anchor="end" fill="#c4b5fd" font-size="11" font-family="Outfit">${t}</text>`;
+      });
+
+      // Axes lines
+      svg += `<line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${padTop + plotH}" stroke="#6d5a9e" />`;
+      svg += `<line x1="${padLeft}" y1="${padTop + plotH}" x2="${width - padRight}" y2="${padTop + plotH}" stroke="#6d5a9e" />`;
+
+      // Bars
+      COMPLEXITY_CHART_DATA.forEach((d, i) => {
+        const gx = padLeft + i * groupW;
+        const center = gx + groupW / 2;
+        const startX = center - (barW * 3 + 4) / 2;
+
+        const bars = [
+          { key: "best", val: d.best, color: "#4ade80" },
+          { key: "avg", val: d.avg, color: "#a855f7" },
+          { key: "worst", val: d.worst, color: "#f97316" }
+        ];
+
+        svg += `<g class="bar-group" onmousemove="showBarTooltip(event, ${i})" onmouseleave="hideTooltip()">`;
+        svg += `<rect x="${gx}" y="${padTop}" width="${groupW}" height="${plotH}" fill="transparent" class="bar-hover-bg" />`;
+
+        bars.forEach((b, bi) => {
+          const bh = Math.max(2, (b.val / maxVal) * plotH);
+          const bx = startX + bi * (barW + 2);
+          const by = padTop + plotH - bh;
+          svg += `<path d="M${bx},${by + 3} Q${bx},${by} ${bx + 3},${by} L${bx + barW - 3},${by} Q${bx + barW},${by} ${bx + barW},${by + 3} L${bx + barW},${padTop + plotH} L${bx},${padTop + plotH} Z" fill="${b.color}" />`;
+        });
+
+        svg += `<text x="${center}" y="${padTop + plotH + 16}" text-anchor="middle" fill="#c4b5fd" font-size="11" font-family="Outfit">${d.name}</text>`;
+        svg += `</g>`;
+      });
+
+      svg += `</svg>`;
+      svg += `
+        <div class="chart-legend">
+          <span><i style="background:#a855f7"></i>Caso Promedio</span>
+          <span><i style="background:#4ade80"></i>Mejor Caso</span>
+          <span><i style="background:#f97316"></i>Peor Caso</span>
+        </div>
+      `;
+      container.innerHTML = svg;
+    }
+
+    function renderRadarChart() {
+      const container = document.getElementById("radar-chart-container");
+      const width = 560, height = 260;
+      const cx = width / 2, cy = 118, radius = 82;
+      const rings = [0.25, 0.5, 0.75, 1];
+      // Angles: Top (Mejor Caso), Right (Caso Promedio), Bottom (Peor Caso), Left (Memoria)
+      const angles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
+
+      let svg = `<svg viewBox="0 0 ${width} ${height}" class="recharts-svg">`;
+
+      // Polar grid polygons
+      rings.forEach(r => {
+        const pts = angles.map(a => `${cx + Math.cos(a) * radius * r},${cy + Math.sin(a) * radius * r}`).join(" ");
+        svg += `<polygon points="${pts}" fill="none" stroke="rgba(168,85,247,0.2)" />`;
+      });
+
+      // Axis lines & Labels
+      RADAR_DATA.forEach((d, i) => {
+        const a = angles[i];
+        const x2 = cx + Math.cos(a) * radius;
+        const y2 = cy + Math.sin(a) * radius;
+        svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="rgba(168,85,247,0.2)" />`;
+
+        const lx = cx + Math.cos(a) * (radius + 18);
+        const ly = cy + Math.sin(a) * (radius + 14);
+        const anchor = i === 1 ? "start" : i === 3 ? "end" : "middle";
+        svg += `<text x="${lx}" y="${ly + 4}" text-anchor="${anchor}" fill="#c4b5fd" font-size="11" font-family="Outfit" style="cursor:pointer" onmousemove="showRadarTooltip(event, ${i})" onmouseleave="hideTooltip()">${d.subject}</text>`;
+      });
+
+      const series = [
+        { name: "Merge", stroke: "#a855f7", fill: "#a855f7", op: 0.15 },
+        { name: "Quick", stroke: "#c084fc", fill: "#c084fc", op: 0.12 },
+        { name: "Bubble", stroke: "#f97316", fill: "#f97316", op: 0.1 },
+        { name: "Stooge", stroke: "#e879f9", fill: "#e879f9", op: 0.1 }
+      ];
+
+      series.forEach(s => {
+        const pts = RADAR_DATA.map((d, i) => {
+          const val = d[s.name] / 100;
+          const a = angles[i];
+          return `${cx + Math.cos(a) * radius * val},${cy + Math.sin(a) * radius * val}`;
+        }).join(" ");
+        svg += `<polygon points="${pts}" stroke="${s.stroke}" stroke-width="1.5" fill="${s.fill}" fill-opacity="${s.op}" />`;
+      });
+
+      svg += `</svg>`;
+      svg += `
+        <div class="chart-legend">
+          <span><i style="background:#f97316"></i>Bubble</span>
+          <span><i style="background:#a855f7"></i>Merge</span>
+          <span><i style="background:#c084fc"></i>Quick</span>
+          <span><i style="background:#e879f9"></i>Stooge</span>
+        </div>
+      `;
+      container.innerHTML = svg;
+    }
+
+    function showBarTooltip(e, idx) {
+      const d = COMPLEXITY_CHART_DATA[idx];
+      const tt = document.getElementById("chart-tooltip");
+      tt.innerHTML = `
+        <div class="tt-title">${d.name}</div>
+        <div style="color:#4ade80">Mejor Caso : ${d.best}</div>
+        <div style="color:#a855f7">Caso Promedio : ${d.avg}</div>
+        <div style="color:#f97316">Peor Caso : ${d.worst}</div>
+      `;
+      tt.classList.remove("hidden");
+      tt.style.left = (e.pageX + 14) + "px";
+      tt.style.top = (e.pageY - 20) + "px";
+    }
+
+    function showRadarTooltip(e, idx) {
+      const d = RADAR_DATA[idx];
+      const tt = document.getElementById("chart-tooltip");
+      tt.innerHTML = `
+        <div class="tt-title">${d.subject}</div>
+        <div style="color:#a855f7">Merge : ${d.Merge}</div>
+        <div style="color:#c084fc">Quick : ${d.Quick}</div>
+        <div style="color:#f97316">Bubble : ${d.Bubble}</div>
+        <div style="color:#e879f9">Stooge : ${d.Stooge}</div>
+      `;
+      tt.classList.remove("hidden");
+      tt.style.left = (e.pageX + 14) + "px";
+      tt.style.top = (e.pageY - 20) + "px";
+    }
+
+    function hideTooltip() {
+      document.getElementById("chart-tooltip").classList.add("hidden");
+    }
+
+    function renderSidebarAndQuickSelect() {
+      const divideConquer = ALGORITHMS.filter(a => a.category === "divide-conquer");
+      const bruteForce = ALGORITHMS.filter(a => a.category === "brute-force");
+
+      const nav = document.getElementById("sidebar-nav");
+      nav.innerHTML = `
+        <button class="nav-item ${activeView === 'dashboard' ? 'nav-item-active' : ''}" onclick="switchView('dashboard'); toggleSidebar(false);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+          </svg>
+          Dashboard
+        </button>
+        <div class="sidebar-section-label"><span class="badge-dv-sm">Divide y Vencerás</span></div>
+        ${divideConquer.map(algo => `
+          <button class="nav-item ${activeView === 'visualizer' && selectedAlgoId === algo.id ? 'nav-item-active' : ''}" onclick="selectAlgoAndOpenVisualizer('${algo.id}'); toggleSidebar(false);">
+            <span class="nav-dot" style="background:${algo.color}; color:${algo.color}"></span>
+            ${algo.name}
+            <span class="nav-complexity">${algo.avgCase}</span>
+          </button>
+        `).join("")}
+        <div class="sidebar-section-label"><span class="badge-fb-sm">Fuerza Bruta</span></div>
+        ${bruteForce.map(algo => `
+          <button class="nav-item ${activeView === 'visualizer' && selectedAlgoId === algo.id ? 'nav-item-active' : ''}" onclick="selectAlgoAndOpenVisualizer('${algo.id}'); toggleSidebar(false);">
+            <span class="nav-dot" style="background:${algo.color}; color:${algo.color}"></span>
+            ${algo.name}
+            <span class="nav-complexity">${algo.avgCase}</span>
+          </button>
+        `).join("")}
+      `;
+
+      const qs = document.getElementById("algo-quickselect");
+      qs.innerHTML = ALGORITHMS.map(a => {
+        const active = selectedAlgoId === a.id;
+        const style = active ? `border-color:${a.color}; background:${a.color}22; color:${a.color};` : "";
+        return `<button class="algo-chip ${active ? 'algo-chip-active' : ''}" style="${style}" onclick="selectAlgoAndOpenVisualizer('${a.id}')">${a.nameShort}</button>`;
+      }).join("");
+    }
+
+    function toggleSidebar(force) {
+      const sb = document.getElementById("sidebar");
+      const bd = document.getElementById("sidebar-backdrop");
+      const isOpen = sb.classList.contains("sidebar-open");
+      const next = typeof force === "boolean" ? force : !isOpen;
+      sb.classList.toggle("sidebar-open", next);
+      sb.classList.toggle("sidebar-closed", !next);
+      bd.classList.toggle("hidden", !next);
+    }
+
+    function switchView(view) {
+      activeView = view;
+      document.getElementById("view-dashboard").classList.toggle("hidden", view !== "dashboard");
+      document.getElementById("view-visualizer").classList.toggle("hidden", view !== "visualizer");
+      document.getElementById("tab-dashboard").classList.toggle("topbar-tab-active", view === "dashboard");
+      document.getElementById("tab-visualizer").classList.toggle("topbar-tab-active", view === "visualizer");
+      document.getElementById("topbar-right-dashboard").classList.toggle("hidden", view !== "dashboard");
+      document.getElementById("topbar-right-visualizer").classList.toggle("hidden", view !== "visualizer");
+      renderSidebarAndQuickSelect();
+      if (view === "visualizer") updateVisualizerUI();
+    }
+
+    function selectAlgoAndOpenVisualizer(id) {
+      selectedAlgoId = id;
+      stopPlaying();
+      steps = [];
+      stepIdx = 0;
+      const algo = ALGORITHMS.find(a => a.id === selectedAlgoId) || ALGORITHMS[0];
+      const maxS = algo.maxSize || 35;
+      currentArray = generateRandomArray(Math.min(arraySize, maxS));
+      switchView("visualizer");
+    }
+
+    function generateRandomArray(n) {
+      return Array.from({ length: n }, () => Math.floor(Math.random() * 96) + 4);
+    }
+
+    function generateSteps(id, arr) {
+      const a = [...arr];
+      const n = a.length;
+      const s = [];
+      const sortedAll = Array.from({ length: n }, (_, i) => i);
+
+      if (id === "bubble") {
+        const sorted = [];
+        for (let i = 0; i < n - 1; i++) {
+          let swapped = false;
+          for (let j = 0; j < n - i - 1; j++) {
+            s.push({ array: [...a], comparing: [j, j + 1], swapping: [], sorted: [...sorted] });
+            if (a[j] > a[j + 1]) {
+              [a[j], a[j + 1]] = [a[j + 1], a[j]];
+              swapped = true;
+              s.push({ array: [...a], comparing: [], swapping: [j, j + 1], sorted: [...sorted] });
+            }
+          }
+          sorted.push(n - 1 - i);
+          if (!swapped) break;
+        }
+      } else if (id === "selection") {
+        const sorted = [];
+        for (let i = 0; i < n - 1; i++) {
+          let minIdx = i;
+          for (let j = i + 1; j < n; j++) {
+            s.push({ array: [...a], comparing: [minIdx, j], swapping: [], sorted: [...sorted] });
+            if (a[j] < a[minIdx]) minIdx = j;
+          }
+          if (minIdx !== i) {
+            [a[i], a[minIdx]] = [a[minIdx], a[i]];
+            s.push({ array: [...a], comparing: [], swapping: [i, minIdx], sorted: [...sorted] });
+          }
+          sorted.push(i);
+        }
+      } else if (id === "insertion") {
+        for (let i = 1; i < n; i++) {
+          let j = i;
+          while (j > 0) {
+            s.push({ array: [...a], comparing: [j - 1, j], swapping: [], sorted: [] });
+            if (a[j] < a[j - 1]) {
+              [a[j], a[j - 1]] = [a[j - 1], a[j]];
+              s.push({ array: [...a], comparing: [], swapping: [j, j - 1], sorted: [] });
+              j--;
+            } else break;
+          }
+        }
+      } else if (id === "gnome") {
+        let idx = 0;
+        while (idx < n) {
+          if (idx === 0) idx++;
+          else {
+            s.push({ array: [...a], comparing: [idx - 1, idx], swapping: [], sorted: [] });
+            if (a[idx] >= a[idx - 1]) idx++;
+            else {
+              [a[idx], a[idx - 1]] = [a[idx - 1], a[idx]];
+              s.push({ array: [...a], comparing: [], swapping: [idx, idx - 1], sorted: [] });
+              idx--;
+            }
+          }
+        }
+      } else if (id === "exchange") {
+        for (let i = 0; i < n - 1; i++) {
+          for (let j = i + 1; j < n; j++) {
+            s.push({ array: [...a], comparing: [i, j], swapping: [], sorted: [] });
+            if (a[i] > a[j]) {
+              [a[i], a[j]] = [a[j], a[i]];
+              s.push({ array: [...a], comparing: [], swapping: [i, j], sorted: [] });
+            }
+          }
+        }
+      } else if (id === "stooge") {
+        function stooge(l, h) {
+          if (l >= h) return;
+          s.push({ array: [...a], comparing: [l, h], swapping: [], sorted: [] });
+          if (a[l] > a[h]) {
+            [a[l], a[h]] = [a[h], a[l]];
+            s.push({ array: [...a], comparing: [], swapping: [l, h], sorted: [] });
+          }
+          if (h - l + 1 > 2) {
+            const t = Math.floor((h - l + 1) / 3);
+            stooge(l, h - t);
+            stooge(l + t, h);
+            stooge(l, h - t);
+          }
+        }
+        stooge(0, n - 1);
+      } else if (id === "merge") {
+        function merge(l, m, r) {
+          const left = a.slice(l, m + 1);
+          const right = a.slice(m + 1, r + 1);
+          let i = 0, j = 0, k = l;
+          while (i < left.length && j < right.length) {
+            s.push({ array: [...a], comparing: [l + i, m + 1 + j], swapping: [], sorted: [] });
+            a[k] = left[i] <= right[j] ? left[i++] : right[j++];
+            s.push({ array: [...a], comparing: [], swapping: [k], sorted: [] });
+            k++;
+          }
+          while (i < left.length) { a[k++] = left[i++]; s.push({ array: [...a], comparing: [], swapping: [], sorted: [] }); }
+          while (j < right.length) { a[k++] = right[j++]; s.push({ array: [...a], comparing: [], swapping: [], sorted: [] }); }
+        }
+        function ms(l, r) {
+          if (l >= r) return;
+          const m = Math.floor((l + r) / 2);
+          ms(l, m); ms(m + 1, r); merge(l, m, r);
+        }
+        ms(0, n - 1);
+      } else if (id === "quick") {
+        function partition(l, r) {
+          const pivot = a[r];
+          let i = l - 1;
+          for (let j = l; j < r; j++) {
+            s.push({ array: [...a], comparing: [j, r], swapping: [], sorted: [] });
+            if (a[j] <= pivot) {
+              i++;
+              if (i !== j) {
+                [a[i], a[j]] = [a[j], a[i]];
+                s.push({ array: [...a], comparing: [], swapping: [i, j], sorted: [] });
+              }
+            }
+          }
+          [a[i + 1], a[r]] = [a[r], a[i + 1]];
+          s.push({ array: [...a], comparing: [], swapping: [i + 1, r], sorted: [] });
+          return i + 1;
+        }
+        function qs(l, r) {
+          if (l < r) {
+            const p = partition(l, r);
+            qs(l, p - 1); qs(p + 1, r);
+          }
+        }
+        qs(0, n - 1);
+      }
+
+      s.push({ array: [...a], comparing: [], swapping: [], sorted: sortedAll });
+      return s;
+    }
+
+    function updateVisualizerUI() {
+      const algo = ALGORITHMS.find(a => a.id === selectedAlgoId) || ALGORITHMS[0];
+      const maxS = algo.maxSize || 35;
+      const size = Math.min(arraySize, maxS);
+
+      document.getElementById("viz-info-dot").style.background = algo.color;
+      document.getElementById("viz-info-dot").style.color = algo.color;
+      document.getElementById("viz-algo-name").textContent = algo.name;
+      document.getElementById("viz-algo-badge").innerHTML = badgeHTML(algo.category);
+      document.getElementById("viz-algo-desc").textContent = algo.description;
+      document.getElementById("viz-best").textContent = algo.bestCase;
+      document.getElementById("viz-avg").textContent = algo.avgCase;
+      document.getElementById("viz-worst").textContent = algo.worstCase;
+      document.getElementById("viz-space").textContent = algo.space;
+      document.getElementById("viz-legend-normal").style.background = algo.color;
+
+      const warn = document.getElementById("viz-stooge-warning");
+      if (algo.maxSize) {
+        warn.classList.remove("hidden");
+        document.getElementById("viz-stooge-text").textContent = `Limitado a ${algo.maxSize} elementos por complejidad`;
+      } else {
+        warn.classList.add("hidden");
+      }
+
+      const sliderSize = document.getElementById("slider-size");
+      sliderSize.max = maxS;
+      sliderSize.value = size;
+      document.getElementById("slider-size-label").textContent = `Tamaño: ${size}`;
+
+      if (currentArray.length === 0) currentArray = generateRandomArray(size);
+      const step = steps[stepIdx] || { array: currentArray, comparing: [], swapping: [], sorted: [] };
+      const arr = step.array;
+      const maxVal = Math.max(...arr, 1);
+
+      document.getElementById("viz-step-current").textContent = steps.length > 0 ? stepIdx + 1 : 0;
+      document.getElementById("viz-step-total").textContent = steps.length;
+      const progress = steps.length > 1 ? Math.round((stepIdx / (steps.length - 1)) * 100) : 0;
+      const progFill = document.getElementById("viz-progress-fill");
+      progFill.style.width = `${progress}%`;
+      progFill.style.background = algo.color;
+
+      const isDone = steps.length > 0 && stepIdx === steps.length - 1;
+      document.getElementById("viz-done-badge").classList.toggle("hidden", !isDone);
+
+      document.getElementById("btn-step-back").disabled = stepIdx === 0 || steps.length === 0;
+      document.getElementById("btn-step-forward").disabled = stepIdx >= steps.length - 1 || steps.length === 0;
+      document.getElementById("btn-reset").disabled = stepIdx === 0;
+
+      const playBtn = document.getElementById("btn-play-pause");
+      playBtn.className = `btn ${isPlaying ? 'btn-pause' : 'btn-play'}`;
+      playBtn.innerHTML = isPlaying
+        ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pausar`
+        : `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> Iniciar`;
+
+      const barsContainer = document.getElementById("bars-container");
+      barsContainer.innerHTML = arr.map((val, idx) => {
+        const h = Math.max(4, (val / maxVal) * 94);
+        let cls = "sort-bar";
+        if (step.sorted.includes(idx)) cls += " bar-sorted";
+        else if (step.swapping.includes(idx)) cls += " bar-swapping";
+        else if (step.comparing.includes(idx)) cls += " bar-comparing";
+        return `<div class="bar-wrapper" title="${val}"><div class="${cls}" style="height:${h}%"></div></div>`;
+      }).join("");
+    }
+
+    function handleGenerate() {
+      stopPlaying();
+      const algo = ALGORITHMS.find(a => a.id === selectedAlgoId) || ALGORITHMS[0];
+      const size = Math.min(arraySize, algo.maxSize || 35);
+      currentArray = generateRandomArray(size);
+      steps = generateSteps(selectedAlgoId, currentArray);
+      stepIdx = 0;
+      updateVisualizerUI();
+    }
+
+    function startPlaying() {
+      isPlaying = true;
+      updateVisualizerUI();
+      intervalId = setInterval(() => {
+        if (stepIdx >= steps.length - 1) {
+          stopPlaying();
+        } else {
+          stepIdx++;
+          updateVisualizerUI();
+        }
+      }, speed);
+    }
+
+    function stopPlaying() {
+      isPlaying = false;
+      if (intervalId) clearInterval(intervalId);
+      intervalId = null;
+      updateVisualizerUI();
+    }
+
+    function handlePlayPause() {
+      if (steps.length === 0) {
+        handleGenerate();
+        startPlaying();
+        return;
+      }
+      if (stepIdx >= steps.length - 1) stepIdx = 0;
+      if (isPlaying) stopPlaying();
+      else startPlaying();
+    }
+
+    function handleStepForward() {
+      if (stepIdx < steps.length - 1) {
+        stepIdx++;
+        updateVisualizerUI();
+      }
+    }
+
+    function handleStepBack() {
+      if (stepIdx > 0) {
+        stepIdx--;
+        updateVisualizerUI();
+      }
+    }
+
+    function handleReset() {
+      stopPlaying();
+      stepIdx = 0;
+      updateVisualizerUI();
+    }
+
+    function handleSpeedChange(val) {
+      speed = 510 - Number(val);
+      document.getElementById("slider-speed-label").textContent =
+        speed < 50 ? "⚡ Rápido" : speed < 150 ? "Normal" : "🐢 Lento";
+      if (isPlaying) {
+        stopPlaying();
+        startPlaying();
+      }
+    }
+
+    function handleSizeChange(val) {
+      arraySize = Number(val);
+      handleGenerate();
+    }
+
+    // Inicializar aplicación en pantalla de inicio (Comparativa)
+    window.addEventListener("DOMContentLoaded", () => {
+      renderDashboard();
+      renderSidebarAndQuickSelect();
+    });
+  </script>
+</body>
+</html>
