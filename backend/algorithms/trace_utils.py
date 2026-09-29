@@ -1,12 +1,34 @@
 import ast
 import inspect
+import textwrap
 
 
 def get_display_source(module):
     module_source = inspect.getsource(module)
     source_lines = module_source.splitlines()
     syntax_tree = ast.parse(module_source)
-    hidden_lines = set()
+    functions = [
+        node for node in syntax_tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    ]
+    core_function = max(
+        functions,
+        key=lambda function: sum(
+            isinstance(node, (ast.If, ast.For, ast.While, ast.Assign, ast.AugAssign))
+            for node in ast.walk(function)
+        ),
+    )
+    core_lines = set(range(core_function.lineno, core_function.end_lineno + 1))
+    hidden_lines = set(range(1, len(source_lines) + 1)) - core_lines
+    hidden_lines.add(core_function.lineno)
+
+    first_statement = core_function.body[0] if core_function.body else None
+    if (
+        isinstance(first_statement, ast.Expr)
+        and isinstance(first_statement.value, ast.Constant)
+        and isinstance(first_statement.value.value, str)
+    ):
+        hidden_lines.update(range(first_statement.lineno, first_statement.end_lineno + 1))
     hidden_parameters = {"on_step", "offset", "visual_values"}
     function_parameters = {
         node.name: [argument.arg for argument in node.args.args]
@@ -110,6 +132,8 @@ def get_display_source(module):
     while visible_source and not visible_source[-1].strip():
         visible_source.pop()
         visible_source_lines.pop()
+
+    visible_source = textwrap.dedent("\n".join(visible_source)).splitlines()
 
     source_line_map = {
         source_line_number: index + 1

@@ -2,7 +2,7 @@ from algorithms.trace_utils import record_step
 
 
 def gnome_sort(lista, on_step=None):
-    arr = lista.copy()
+    arr = lista
     i = 0
     n = len(arr)
     

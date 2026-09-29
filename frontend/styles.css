@@ -992,13 +992,6 @@ body {
 
 .code-line-active .code-line-number { color: var(--purple-light); }
 
-.code-line-active > span:last-child {
-  text-decoration: underline;
-  text-decoration-color: var(--purple-light);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-}
-
 .controls-row {
   display: flex;
   align-items: center;

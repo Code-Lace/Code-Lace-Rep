@@ -3,7 +3,7 @@ from algorithms.trace_utils import record_step
 
 def insertion_sort(lista, on_step=None):
     
-    arr = lista.copy()
+    arr = lista
     for i in range(1, len(arr)):
         clave = arr[i]
         j = i - 1

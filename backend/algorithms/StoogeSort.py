@@ -23,7 +23,7 @@ def stooge_sort_rec(arr, l, h, on_step=None):
 
 def stooge_sort(lista, on_step=None):
 
-    arr = lista.copy()
+    arr = lista
     stooge_sort_rec(arr, 0, len(arr) - 1, on_step)
     record_step(on_step, arr, sorted_indices=range(len(arr)))
     return arr
