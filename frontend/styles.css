@@ -480,6 +480,7 @@ body {
 .dashboard-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 6px 0 4px;
 }
@@ -490,6 +491,7 @@ body {
   font-weight: 700;
   color: var(--purple-pale);
   letter-spacing: 0.06em;
+  text-align: center;
 }
 
 .algo-cards-grid {
@@ -525,16 +527,16 @@ body {
 }
 
 .algo-card-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--purple-pale);
   margin-bottom: 4px;
 }
 
 .algo-card-complexity {
   margin-top: 5px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 
@@ -552,6 +554,22 @@ body {
   color: var(--lavender);
   margin-bottom: 16px;
   letter-spacing: 0.02em;
+}
+
+.chart-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.chart-heading .chart-title { margin-bottom: 0; }
+
+.benchmark-status {
+  color: var(--text-dim);
+  font-size: 11px;
+  text-align: right;
 }
 
 .chart-container {
@@ -575,10 +593,20 @@ body {
 .chart-legend {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 16px;
   font-size: 12px;
   color: #c4b5fd;
   padding-top: 4px;
+}
+
+.chart-placeholder {
+  display: grid;
+  min-height: 210px;
+  place-items: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: center;
 }
 
 .chart-legend span {
