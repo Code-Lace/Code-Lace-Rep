@@ -1,17 +1,12 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+import inspect
 import time
 
-# Importamos los algoritmos desde la carpeta algorithms
-from algorithms.BubbleSort import bubble_sort
-from algorithms.SelectionSort import selection_sort
-from algorithms.Insertion_sort import insertion_sort
-from algorithms.Exchange_sort import exchange_sort
-from algorithms.Gnome_sort import gnome_sort
-from algorithms.StoogeSort import stooge_sort
-from algorithms.MergeSort import merge_sort
-from algorithms.QuickSort import quick_sort
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from algorithms import BubbleSort, Exchange_sort, Gnome_sort, Insertion_sort
+from algorithms import MergeSort, QuickSort, SelectionSort, StoogeSort
 
 
 app = FastAPI(title="Code & Lace Backend", version="1.0")
@@ -28,34 +23,57 @@ app.add_middleware(
 class SortRequest(BaseModel):
     data: list[int]
 
+
+SORTERS = {
+    "bubble": (BubbleSort.bubble_sort, BubbleSort),
+    "selection": (SelectionSort.selection_sort, SelectionSort),
+    "insertion": (Insertion_sort.insertion_sort, Insertion_sort),
+    "exchange": (Exchange_sort.exchange_sort, Exchange_sort),
+    "gnome": (Gnome_sort.gnome_sort, Gnome_sort),
+    "stooge": (StoogeSort.stooge_sort, StoogeSort),
+    "merge": (MergeSort.merge_sort, MergeSort),
+    "quick": (QuickSort.quick_sort, QuickSort),
+}
+
+
+def sort_data(algo_name, data, on_step=None):
+    sort_function, _ = SORTERS[algo_name]
+    arr = data.copy()
+    result = sort_function(arr, on_step=on_step)
+    return arr if result is None else result
+
+
 @app.post("/api/sort/{algo_name}")
 def run_sort(algo_name: str, request: SortRequest):
-    arr = request.data.copy()
-    start = time.perf_counter()
-
-    if algo_name == "bubble":
-        bubble_sort(arr)
-    elif algo_name == "selection":
-        selection_sort(arr)
-    elif algo_name == "insertion":
-        insertion_sort(arr)
-    elif algo_name == "exchange":
-        arr = exchange_sort(arr)
-    elif algo_name == "gnome":
-        arr = gnome_sort(arr)
-    elif algo_name == "stooge":
-        arr = stooge_sort(arr)
-    elif algo_name == "merge":
-        merge_sort(arr)
-    elif algo_name == "quick":
-        quick_sort(arr)
-    else:
+    if algo_name not in SORTERS:
         return {"error": "Algoritmo no registrado"}
 
-    duration = (time.perf_counter() - start) * 1000    # Son en Milisegundos
+    start = time.perf_counter()
+    arr = sort_data(algo_name, request.data)
+    duration = (time.perf_counter() - start) * 1000
 
     return {
         "algorithm": algo_name,
         "sorted_data": arr,
         "time_ms": round(duration, 4)
+    }
+
+
+@app.post("/api/visualize/{algo_name}")
+def visualize_sort(algo_name: str, request: SortRequest):
+    if algo_name not in SORTERS:
+        raise HTTPException(status_code=404, detail="Algoritmo no registrado")
+
+    steps = []
+    start = time.perf_counter()
+    arr = sort_data(algo_name, request.data, on_step=steps.append)
+    duration = (time.perf_counter() - start) * 1000
+    _, module = SORTERS[algo_name]
+
+    return {
+        "algorithm": algo_name,
+        "sorted_data": arr,
+        "time_ms": round(duration, 4),
+        "steps": steps,
+        "source": inspect.getsource(module).splitlines(),
     }

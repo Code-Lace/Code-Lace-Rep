@@ -1,4 +1,7 @@
-def gnome_sort(lista):
+from algorithms.trace_utils import record_step
+
+
+def gnome_sort(lista, on_step=None):
     arr = lista.copy()
     i = 0
     n = len(arr)
@@ -7,7 +10,9 @@ def gnome_sort(lista):
         if i == 0 or arr[i] >= arr[i - 1]:
             i += 1  # Avanza si está en orden
         else:
+            record_step(on_step, arr, comparing=[i - 1, i])
             arr[i], arr[i - 1] = arr[i - 1], arr[i]  # Intercambia
+            record_step(on_step, arr, swapping=[i - 1, i])
             i -= 1  # Retrocede un paso
-            
+    record_step(on_step, arr, sorted_indices=range(n))
     return arr

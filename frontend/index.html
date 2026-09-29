@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SortViz - Algoritmos de Ordenamiento</title>
+  <title> Code & Lace - Algoritmos de Ordenamiento</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -36,7 +36,7 @@
           </svg>
         </div>
         <div>
-          <div class="sidebar-logo-title">SortViz</div>
+          <div class="sidebar-logo-title">Code & Lace</div>
           <div class="sidebar-logo-sub">Algoritmos de Ordenamiento</div>
         </div>
         <button class="sidebar-close-btn" onclick="toggleSidebar(false)">
@@ -52,7 +52,7 @@
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="text-purple-400">
           <path d="M5 0L5.8 4.2L10 5L5.8 5.8L5 10L4.2 5.8L0 5L4.2 4.2L5 0Z" fill="currentColor" />
         </svg>
-        <span>SortViz v1.0</span>
+        <span>Code & Lace v1.0</span>
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="text-purple-400">
           <path d="M5 0L5.8 4.2L10 5L5.8 5.8L5 10L4.2 5.8L0 5L4.2 4.2L5 0Z" fill="currentColor" />
         </svg>
@@ -75,7 +75,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-purple-300">
               <path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5L12 2Z" fill="currentColor" />
             </svg>
-            <span>SortViz</span>
+            <span>Code & Lace</span>
           </div>
         </div>
 
@@ -307,6 +307,19 @@
                 </div>
               </div>
             </div>
+
+            <section class="source-panel" aria-label="Código Python del algoritmo">
+              <div class="source-panel-header">
+                <div class="source-panel-title">
+                  <span class="source-panel-dots" aria-hidden="true">
+                    <span></span><span></span><span></span>
+                  </span>
+                  <span>PYTHON SOURCE</span>
+                </div>
+                <span id="source-status" class="source-status">Esperando algoritmo</span>
+              </div>
+              <pre class="source-code"><code id="source-code">Genera una lista para cargar el código Python.</code></pre>
+            </section>
           </div>
         </div>
       </main>
@@ -317,6 +330,8 @@
   <div id="chart-tooltip" class="chart-tooltip hidden"></div>
 
   <script>
+    const API_BASE_URL = "http://127.0.0.1:8000";
+
     const ALGORITHMS = [
       {
         id: "merge",
@@ -444,6 +459,12 @@
     let isPlaying = false;
     let intervalId = null;
     let currentArray = [];
+    let pythonSource = [];
+    let backendDuration = 0;
+    let apiError = "";
+    let isGenerating = false;
+    let generationRequest = 0;
+    let activeRequestController = null;
 
     function badgeHTML(category) {
       return category === "divide-conquer"
@@ -696,7 +717,10 @@
       document.getElementById("topbar-right-dashboard").classList.toggle("hidden", view !== "dashboard");
       document.getElementById("topbar-right-visualizer").classList.toggle("hidden", view !== "visualizer");
       renderSidebarAndQuickSelect();
-      if (view === "visualizer") updateVisualizerUI();
+      if (view === "visualizer") {
+        updateVisualizerUI();
+        if (steps.length === 0 && !isGenerating) handleGenerate();
+      }
     }
 
     function selectAlgoAndOpenVisualizer(id) {
@@ -704,6 +728,8 @@
       stopPlaying();
       steps = [];
       stepIdx = 0;
+      pythonSource = [];
+      apiError = "";
       const algo = ALGORITHMS.find(a => a.id === selectedAlgoId) || ALGORITHMS[0];
       const maxS = algo.maxSize || 35;
       currentArray = generateRandomArray(Math.min(arraySize, maxS));
@@ -714,142 +740,37 @@
       return Array.from({ length: n }, () => Math.floor(Math.random() * 96) + 4);
     }
 
-    function generateSteps(id, arr) {
-      const a = [...arr];
-      const n = a.length;
-      const s = [];
-      const sortedAll = Array.from({ length: n }, (_, i) => i);
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
 
-      if (id === "bubble") {
-        const sorted = [];
-        for (let i = 0; i < n - 1; i++) {
-          let swapped = false;
-          for (let j = 0; j < n - i - 1; j++) {
-            s.push({ array: [...a], comparing: [j, j + 1], swapping: [], sorted: [...sorted] });
-            if (a[j] > a[j + 1]) {
-              [a[j], a[j + 1]] = [a[j + 1], a[j]];
-              swapped = true;
-              s.push({ array: [...a], comparing: [], swapping: [j, j + 1], sorted: [...sorted] });
-            }
-          }
-          sorted.push(n - 1 - i);
-          if (!swapped) break;
-        }
-      } else if (id === "selection") {
-        const sorted = [];
-        for (let i = 0; i < n - 1; i++) {
-          let minIdx = i;
-          for (let j = i + 1; j < n; j++) {
-            s.push({ array: [...a], comparing: [minIdx, j], swapping: [], sorted: [...sorted] });
-            if (a[j] < a[minIdx]) minIdx = j;
-          }
-          if (minIdx !== i) {
-            [a[i], a[minIdx]] = [a[minIdx], a[i]];
-            s.push({ array: [...a], comparing: [], swapping: [i, minIdx], sorted: [...sorted] });
-          }
-          sorted.push(i);
-        }
-      } else if (id === "insertion") {
-        for (let i = 1; i < n; i++) {
-          let j = i;
-          while (j > 0) {
-            s.push({ array: [...a], comparing: [j - 1, j], swapping: [], sorted: [] });
-            if (a[j] < a[j - 1]) {
-              [a[j], a[j - 1]] = [a[j - 1], a[j]];
-              s.push({ array: [...a], comparing: [], swapping: [j, j - 1], sorted: [] });
-              j--;
-            } else break;
-          }
-        }
-      } else if (id === "gnome") {
-        let idx = 0;
-        while (idx < n) {
-          if (idx === 0) idx++;
-          else {
-            s.push({ array: [...a], comparing: [idx - 1, idx], swapping: [], sorted: [] });
-            if (a[idx] >= a[idx - 1]) idx++;
-            else {
-              [a[idx], a[idx - 1]] = [a[idx - 1], a[idx]];
-              s.push({ array: [...a], comparing: [], swapping: [idx, idx - 1], sorted: [] });
-              idx--;
-            }
-          }
-        }
-      } else if (id === "exchange") {
-        for (let i = 0; i < n - 1; i++) {
-          for (let j = i + 1; j < n; j++) {
-            s.push({ array: [...a], comparing: [i, j], swapping: [], sorted: [] });
-            if (a[i] > a[j]) {
-              [a[i], a[j]] = [a[j], a[i]];
-              s.push({ array: [...a], comparing: [], swapping: [i, j], sorted: [] });
-            }
-          }
-        }
-      } else if (id === "stooge") {
-        function stooge(l, h) {
-          if (l >= h) return;
-          s.push({ array: [...a], comparing: [l, h], swapping: [], sorted: [] });
-          if (a[l] > a[h]) {
-            [a[l], a[h]] = [a[h], a[l]];
-            s.push({ array: [...a], comparing: [], swapping: [l, h], sorted: [] });
-          }
-          if (h - l + 1 > 2) {
-            const t = Math.floor((h - l + 1) / 3);
-            stooge(l, h - t);
-            stooge(l + t, h);
-            stooge(l, h - t);
-          }
-        }
-        stooge(0, n - 1);
-      } else if (id === "merge") {
-        function merge(l, m, r) {
-          const left = a.slice(l, m + 1);
-          const right = a.slice(m + 1, r + 1);
-          let i = 0, j = 0, k = l;
-          while (i < left.length && j < right.length) {
-            s.push({ array: [...a], comparing: [l + i, m + 1 + j], swapping: [], sorted: [] });
-            a[k] = left[i] <= right[j] ? left[i++] : right[j++];
-            s.push({ array: [...a], comparing: [], swapping: [k], sorted: [] });
-            k++;
-          }
-          while (i < left.length) { a[k++] = left[i++]; s.push({ array: [...a], comparing: [], swapping: [], sorted: [] }); }
-          while (j < right.length) { a[k++] = right[j++]; s.push({ array: [...a], comparing: [], swapping: [], sorted: [] }); }
-        }
-        function ms(l, r) {
-          if (l >= r) return;
-          const m = Math.floor((l + r) / 2);
-          ms(l, m); ms(m + 1, r); merge(l, m, r);
-        }
-        ms(0, n - 1);
-      } else if (id === "quick") {
-        function partition(l, r) {
-          const pivot = a[r];
-          let i = l - 1;
-          for (let j = l; j < r; j++) {
-            s.push({ array: [...a], comparing: [j, r], swapping: [], sorted: [] });
-            if (a[j] <= pivot) {
-              i++;
-              if (i !== j) {
-                [a[i], a[j]] = [a[j], a[i]];
-                s.push({ array: [...a], comparing: [], swapping: [i, j], sorted: [] });
-              }
-            }
-          }
-          [a[i + 1], a[r]] = [a[r], a[i + 1]];
-          s.push({ array: [...a], comparing: [], swapping: [i + 1, r], sorted: [] });
-          return i + 1;
-        }
-        function qs(l, r) {
-          if (l < r) {
-            const p = partition(l, r);
-            qs(l, p - 1); qs(p + 1, r);
-          }
-        }
-        qs(0, n - 1);
+    function renderSourceCode(activeLine) {
+      const code = document.getElementById("source-code");
+      if (pythonSource.length === 0) {
+        code.textContent = apiError || (isGenerating ? "Solicitando pasos al backend Python..." : "Genera una lista para cargar el código Python.");
+        code.removeAttribute("data-algorithm");
+        return;
       }
 
-      s.push({ array: [...a], comparing: [], swapping: [], sorted: sortedAll });
-      return s;
+      if (code.dataset.algorithm !== selectedAlgoId) {
+        code.innerHTML = pythonSource.map((line, index) =>
+          `<span class="code-line" data-line="${index + 1}"><span class="code-line-number">${String(index + 1).padStart(2, "0")}</span><span>${escapeHTML(line) || " "}</span></span>`
+        ).join("");
+        code.dataset.algorithm = selectedAlgoId;
+      }
+
+      code.querySelector(".code-line-active")?.classList.remove("code-line-active");
+      if (activeLine) {
+        const activeCodeLine = code.querySelector(`[data-line="${activeLine}"]`);
+        activeCodeLine?.classList.add("code-line-active");
+        activeCodeLine?.scrollIntoView({ block: "nearest" });
+      }
     }
 
     function updateVisualizerUI() {
@@ -915,16 +836,66 @@
         else if (step.comparing.includes(idx)) cls += " bar-comparing";
         return `<div class="bar-wrapper" title="${val}"><div class="${cls}" style="height:${h}%"></div></div>`;
       }).join("");
+
+      const sourceStatus = document.getElementById("source-status");
+      sourceStatus.textContent = isGenerating
+        ? "Conectando con Python..."
+        : apiError || (pythonSource.length ? `${steps.length} pasos | ${backendDuration} ms` : "Esperando algoritmo");
+      sourceStatus.classList.toggle("source-status-error", Boolean(apiError));
+      renderSourceCode(step.line);
     }
 
-    function handleGenerate() {
+    async function handleGenerate() {
       stopPlaying();
+      const requestId = ++generationRequest;
+      activeRequestController?.abort();
+      const controller = new AbortController();
+      activeRequestController = controller;
       const algo = ALGORITHMS.find(a => a.id === selectedAlgoId) || ALGORITHMS[0];
       const size = Math.min(arraySize, algo.maxSize || 35);
       currentArray = generateRandomArray(size);
-      steps = generateSteps(selectedAlgoId, currentArray);
+      steps = [];
       stepIdx = 0;
+      pythonSource = [];
+      backendDuration = 0;
+      apiError = "";
+      isGenerating = true;
       updateVisualizerUI();
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/visualize/${encodeURIComponent(selectedAlgoId)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data: currentArray }),
+          signal: controller.signal
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.detail || "La solicitud al backend falló.");
+        if (requestId !== generationRequest) return false;
+        if (!Array.isArray(payload.steps) || !Array.isArray(payload.source)) {
+          throw new Error("El backend devolvió una respuesta incompleta.");
+        }
+
+        steps = payload.steps;
+        pythonSource = payload.source;
+        backendDuration = payload.time_ms;
+        currentArray = steps[0]?.array || currentArray;
+        updateVisualizerUI();
+        return steps.length > 0;
+      } catch (error) {
+        if (requestId !== generationRequest || error.name === "AbortError") return false;
+        apiError = `Backend Python no disponible: ${error.message}`;
+        steps = [];
+        pythonSource = [];
+        updateVisualizerUI();
+        return false;
+      } finally {
+        if (requestId === generationRequest) {
+          isGenerating = false;
+          activeRequestController = null;
+          updateVisualizerUI();
+        }
+      }
     }
 
     function startPlaying() {
@@ -947,9 +918,11 @@
       updateVisualizerUI();
     }
 
-    function handlePlayPause() {
+    async function handlePlayPause() {
+      if (isGenerating) return;
       if (steps.length === 0) {
-        handleGenerate();
+        const generated = await handleGenerate();
+        if (!generated) return;
         startPlaying();
         return;
       }
