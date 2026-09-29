@@ -1,17 +1,14 @@
-from fastapi import FastAPI
+import time
+import random
+from statistics import median
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import time
 
-# Importamos los algoritmos desde la carpeta algorithms
-from algorithms.BubbleSort import bubble_sort
-from algorithms.SelectionSort import selection_sort
-from algorithms.Insertion_sort import insertion_sort
-from algorithms.Exchange_sort import exchange_sort
-from algorithms.Gnome_sort import gnome_sort
-from algorithms.StoogeSort import stooge_sort
-from algorithms.MergeSort import merge_sort
-from algorithms.QuickSort import quick_sort
+from algorithms import BubbleSort, Exchange_sort, Gnome_sort, Insertion_sort
+from algorithms import MergeSort, QuickSort, SelectionSort, StoogeSort
+from algorithms.trace_utils import get_display_source
 
 
 app = FastAPI(title="Code & Lace Backend", version="1.0")
@@ -28,34 +25,117 @@ app.add_middleware(
 class SortRequest(BaseModel):
     data: list[int]
 
+
+SORTERS = {
+    "bubble": (BubbleSort.bubble_sort, BubbleSort),
+    "selection": (SelectionSort.selection_sort, SelectionSort),
+    "insertion": (Insertion_sort.insertion_sort, Insertion_sort),
+    "exchange": (Exchange_sort.exchange_sort, Exchange_sort),
+    "gnome": (Gnome_sort.gnome_sort, Gnome_sort),
+    "stooge": (StoogeSort.stooge_sort, StoogeSort),
+    "merge": (MergeSort.merge_sort, MergeSort),
+    "quick": (QuickSort.quick_sort, QuickSort),
+}
+
+BENCHMARK_ALGORITHMS = tuple(name for name in SORTERS if name != "stooge")
+BENCHMARK_SIZES = tuple(range(10, 101, 10))
+BENCHMARK_ROUNDS = 7
+
+
+def sort_data(algo_name, data, on_step=None):
+    sort_function, _ = SORTERS[algo_name]
+    arr = data.copy()
+    result = sort_function(arr, on_step=on_step)
+    return arr if result is None else result
+
+
+def measure_sort(sort_function, values):
+    durations = []
+    for _ in range(BENCHMARK_ROUNDS):
+        sample = values.copy()
+        start = time.perf_counter()
+        sort_function(sample)
+        durations.append((time.perf_counter() - start) * 1000)
+    return round(median(durations), 6)
+
+
 @app.post("/api/sort/{algo_name}")
 def run_sort(algo_name: str, request: SortRequest):
-    arr = request.data.copy()
-    start = time.perf_counter()
-
-    if algo_name == "bubble":
-        bubble_sort(arr)
-    elif algo_name == "selection":
-        selection_sort(arr)
-    elif algo_name == "insertion":
-        insertion_sort(arr)
-    elif algo_name == "exchange":
-        arr = exchange_sort(arr)
-    elif algo_name == "gnome":
-        arr = gnome_sort(arr)
-    elif algo_name == "stooge":
-        arr = stooge_sort(arr)
-    elif algo_name == "merge":
-        merge_sort(arr)
-    elif algo_name == "quick":
-        quick_sort(arr)
-    else:
+    if algo_name not in SORTERS:
         return {"error": "Algoritmo no registrado"}
 
-    duration = (time.perf_counter() - start) * 1000    # Son en Milisegundos
+    start = time.perf_counter()
+    arr = sort_data(algo_name, request.data)
+    duration = (time.perf_counter() - start) * 1000
 
     return {
         "algorithm": algo_name,
         "sorted_data": arr,
         "time_ms": round(duration, 4)
+    }
+
+
+@app.get("/api/benchmark")
+def benchmark_algorithms():
+    line_series = []
+    for algo_name in BENCHMARK_ALGORITHMS:
+        sort_function, _ = SORTERS[algo_name]
+        measurements = []
+        for size in BENCHMARK_SIZES:
+            generator = random.Random(2026 + size)
+            values = [generator.randrange(1, 100_001) for _ in range(size)]
+            measurements.append(measure_sort(sort_function, values))
+        line_series.append({"algorithm": algo_name, "sizes": BENCHMARK_SIZES, "times_ms": measurements})
+
+    scenario_size = 100
+    scenarios = []
+    for scenario_name in ("Ordenado", "Aleatorio", "Inverso"):
+        measurements = []
+        for algo_name in BENCHMARK_ALGORITHMS:
+            sort_function, _ = SORTERS[algo_name]
+            generator = random.Random(2026 + scenario_size)
+            random_values = [generator.randrange(1, 100_001) for _ in range(scenario_size)]
+            if scenario_name == "Ordenado":
+                values = sorted(random_values)
+            elif scenario_name == "Inverso":
+                values = sorted(random_values, reverse=True)
+            else:
+                values = random_values
+            measurements.append({
+                "algorithm": algo_name,
+                "input_size": scenario_size,
+                "time_ms": measure_sort(sort_function, values),
+            })
+        scenarios.append({"name": scenario_name, "measurements": measurements})
+
+    return {
+        "sizes": BENCHMARK_SIZES,
+        "line_series": line_series,
+        "scenario_size": scenario_size,
+        "scenarios": scenarios,
+        "rounds": BENCHMARK_ROUNDS,
+    }
+
+
+@app.post("/api/visualize/{algo_name}")
+def visualize_sort(algo_name: str, request: SortRequest):
+    if algo_name not in SORTERS:
+        raise HTTPException(status_code=404, detail="Algoritmo no registrado")
+
+    steps = []
+    start = time.perf_counter()
+    arr = sort_data(algo_name, request.data, on_step=steps.append)
+    duration = (time.perf_counter() - start) * 1000
+    _, module = SORTERS[algo_name]
+    source, map_source_line = get_display_source(module)
+    for step in steps:
+        direction = "next" if step["comparing"] else "previous" if step["swapping"] else "last"
+        step["line"] = map_source_line(step["line"], direction)
+
+    return {
+        "algorithm": algo_name,
+        "sorted_data": arr,
+        "time_ms": round(duration, 4),
+        "steps": steps,
+        "source": source,
     }
