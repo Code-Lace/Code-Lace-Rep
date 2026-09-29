@@ -8,6 +8,17 @@ El objetivo de nuestro proyecto es proporcionar una plataforma web interactiva d
 - **Visualización animada:** Observa el comportamiento de algoritmos de ordenamiento iteración por iteración.
 - **Interfaz web responsiva:** Diseño limpio y accesible para ejecutar las pruebas de ordenamiento directamente en el navegador.
 - **Control de ejecución:** Pausa, reanuda o ajusta la velocidad de las animaciones para analizar el código a tu propio ritmo.
+## Algoritmos Implementados
+
+Nuestra plataforma permite visualizar los siguientes métodos de ordenamiento:
+
+- Gnome Sort
+- Exchange Sort
+- Quick Sort
+- Bubble Sort
+- Selection Sort
+- Insertion Sort
+- Merge Sort
 
 ## Tecnologías y Herramientas Utilizadas
 
@@ -34,3 +45,12 @@ Durante el desarrollo de **Code & Lace**, el equipo utilizó herramientas de Int
 * **Depuración de Código (Debugging):** Apoyo para identificar y solucionar errores de sintaxis, así como para optimizar fragmentos de código en HTML, CSS y Python.
 * **Lógica de Algoritmos:** Consultas puntuales para reforzar la comprensión y asegurar la implementación correcta de la lógica detrás de los algoritmos de ordenamiento.
 * **Diseño y Estructura:** Generación de ideas y sugerencias de paletas de colores o distribución de elementos visuales que posteriormente se implementaron en Figma.
+## Como ejecutar
+* **Con vercel se inicia tanto el proyecto como el deployment para la página vinculándolo con GitHub
+
+## Conclusiones
+A través de este proyecto se alcanzaron los siguientes puntos clave:
+
+- **Comprensión visual de algoritmos:** Se logró transformar el comportamiento interno de siete métodos de ordenamiento en representaciones gráficas paso a paso, reduciendo la brecha entre el análisis teórico y la práctica.
+- **Integración full-stack:** Se articuló de manera efectiva el diseño y la maquetación web en el frontend (HTML/CSS) con la lógica computacional implementada en Python para el procesamiento de los algoritmos.
+- **Flujo de trabajo colaborativo:** El uso coordinado de Git y GitHub permitió una gestión organizada de versiones y ramas de trabajo entre los cuatro integrantes, garantizando la trazabilidad de los componentes desarrollados.
