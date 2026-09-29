@@ -2,7 +2,7 @@ from algorithms.trace_utils import record_step
 
 
 def stooge_sort_rec(arr, l, h, on_step=None):
-    """Función recursiva auxiliar para Stooge Sort."""
+
     if l >= h:
         return
 
@@ -22,10 +22,7 @@ def stooge_sort_rec(arr, l, h, on_step=None):
 
 
 def stooge_sort(lista, on_step=None):
-    """
-    Ordenamiento Stooge Sort (Recursivo).
-    Complejidad: O(n^(log 3 / log 1.5)) ≈ O(n^2.71)
-    """
+
     arr = lista.copy()
     stooge_sort_rec(arr, 0, len(arr) - 1, on_step)
     record_step(on_step, arr, sorted_indices=range(len(arr)))

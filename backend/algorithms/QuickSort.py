@@ -2,7 +2,7 @@ from algorithms.trace_utils import record_step
 
 
 def quick_sort(lista, on_step=None):
-	"""Ordena una lista usando Quick Sort."""
+
 	_quick_sort(lista, 0, len(lista) - 1, on_step)
 
 

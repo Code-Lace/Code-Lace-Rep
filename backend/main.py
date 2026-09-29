@@ -1,4 +1,3 @@
-import inspect
 import time
 
 from fastapi import FastAPI, HTTPException
@@ -7,6 +6,7 @@ from pydantic import BaseModel
 
 from algorithms import BubbleSort, Exchange_sort, Gnome_sort, Insertion_sort
 from algorithms import MergeSort, QuickSort, SelectionSort, StoogeSort
+from algorithms.trace_utils import get_display_source
 
 
 app = FastAPI(title="Code & Lace Backend", version="1.0")
@@ -69,11 +69,15 @@ def visualize_sort(algo_name: str, request: SortRequest):
     arr = sort_data(algo_name, request.data, on_step=steps.append)
     duration = (time.perf_counter() - start) * 1000
     _, module = SORTERS[algo_name]
+    source, map_source_line = get_display_source(module)
+    for step in steps:
+        direction = "next" if step["comparing"] else "previous" if step["swapping"] else "last"
+        step["line"] = map_source_line(step["line"], direction)
 
     return {
         "algorithm": algo_name,
         "sorted_data": arr,
         "time_ms": round(duration, 4),
         "steps": steps,
-        "source": inspect.getsource(module).splitlines(),
+        "source": source,
     }

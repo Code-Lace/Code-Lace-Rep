@@ -2,7 +2,7 @@ from algorithms.trace_utils import record_step
 
 
 def bubble_sort(lista, on_step=None):
-	"""Ordena una lista usando Bubble Sort"""
+
 	n = len(lista)
 	sorted_indices = []
 	for i in range(n):

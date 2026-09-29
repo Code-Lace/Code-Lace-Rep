@@ -22,27 +22,29 @@ def _merge_sort(arr, on_step, offset, visual_values):
         record_step(on_step, visual_values, comparing=[offset + i, offset + mid + j])
         if left_half[i] <= right_half[j]:
             arr[k] = left_half[i]
+            visual_values[offset + k] = arr[k]
+            record_step(on_step, visual_values, swapping=[offset + k])
             i += 1
         else:
             arr[k] = right_half[j]
+            visual_values[offset + k] = arr[k]
+            record_step(on_step, visual_values, swapping=[offset + k])
             j += 1
-        visual_values[offset + k] = arr[k]
-        record_step(on_step, visual_values, swapping=[offset + k])
         k += 1
 
     while i < len(left_half):
         arr[k] = left_half[i]
         visual_values[offset + k] = arr[k]
+        record_step(on_step, visual_values, swapping=[offset + k])
         i += 1
         k += 1
-        record_step(on_step, visual_values, swapping=[offset + k - 1])
 
     while j < len(right_half):
         arr[k] = right_half[j]
         visual_values[offset + k] = arr[k]
+        record_step(on_step, visual_values, swapping=[offset + k])
         j += 1
         k += 1
-        record_step(on_step, visual_values, swapping=[offset + k - 1])
 
     if offset == 0:
         record_step(on_step, visual_values, sorted_indices=range(len(arr)))

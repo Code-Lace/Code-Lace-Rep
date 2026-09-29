@@ -2,10 +2,7 @@ from algorithms.trace_utils import record_step
 
 
 def insertion_sort(lista, on_step=None):
-    """
-    Ordenamiento por Inserción
-    Complejidad: O(N^2)
-    """
+    
     arr = lista.copy()
     for i in range(1, len(arr)):
         clave = arr[i]

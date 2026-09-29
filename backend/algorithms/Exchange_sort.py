@@ -2,10 +2,7 @@ from algorithms.trace_utils import record_step
 
 
 def exchange_sort(lista, on_step=None):
-    """
-    Ordenamiento por Intercambio Directo (Exchange Sort)
-    Complejidad: O(N^2)
-    """
+
     arr = lista.copy()
     n = len(arr)
     for i in range(n - 1):

@@ -289,7 +289,7 @@
                     </svg>
                     Velocidad
                   </label>
-                  <input id="slider-speed" type="range" min="10" max="500" value="430" class="slider" oninput="handleSpeedChange(this.value)" />
+                  <input id="slider-speed" type="range" min="10" max="1000" value="922" class="slider" oninput="handleSpeedChange(this.value)" />
                   <span id="slider-speed-label" class="slider-value">Normal</span>
                 </div>
 
@@ -755,6 +755,7 @@
       if (pythonSource.length === 0) {
         code.textContent = apiError || (isGenerating ? "Solicitando pasos al backend Python..." : "Genera una lista para cargar el código Python.");
         code.removeAttribute("data-algorithm");
+        code.removeAttribute("data-active-line");
         return;
       }
 
@@ -763,14 +764,36 @@
           `<span class="code-line" data-line="${index + 1}"><span class="code-line-number">${String(index + 1).padStart(2, "0")}</span><span>${escapeHTML(line) || " "}</span></span>`
         ).join("");
         code.dataset.algorithm = selectedAlgoId;
+        delete code.dataset.activeLine;
       }
 
-      code.querySelector(".code-line-active")?.classList.remove("code-line-active");
-      if (activeLine) {
+      if (code.dataset.activeLine !== String(activeLine || "")) {
+        code.querySelector(".code-line-active")?.classList.remove("code-line-active");
         const activeCodeLine = code.querySelector(`[data-line="${activeLine}"]`);
         activeCodeLine?.classList.add("code-line-active");
-        activeCodeLine?.scrollIntoView({ block: "nearest" });
+        if (activeLine) activeCodeLine?.scrollIntoView({ block: "nearest" });
+        code.dataset.activeLine = String(activeLine || "");
       }
+    }
+
+    function animateBarSwap(firstIndex, secondIndex) {
+      const barsContainer = document.getElementById("bars-container");
+      const firstWrapper = barsContainer.children[firstIndex];
+      const secondWrapper = barsContainer.children[secondIndex];
+      if (!firstWrapper || !secondWrapper) return;
+
+      const distance = secondWrapper.getBoundingClientRect().left - firstWrapper.getBoundingClientRect().left;
+      const duration = Math.min(360, Math.max(90, speed * 1.5));
+      const easing = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+      firstWrapper.firstElementChild.animate(
+        [{ transform: `translateX(${distance}px) scaleY(1.24)` }, { transform: "translateX(0) scaleY(1.04)" }],
+        { duration, easing }
+      );
+      secondWrapper.firstElementChild.animate(
+        [{ transform: `translateX(${-distance}px) scaleY(1.24)` }, { transform: "translateX(0) scaleY(1.04)" }],
+        { duration, easing }
+      );
     }
 
     function updateVisualizerUI() {
@@ -787,7 +810,7 @@
       document.getElementById("viz-avg").textContent = algo.avgCase;
       document.getElementById("viz-worst").textContent = algo.worstCase;
       document.getElementById("viz-space").textContent = algo.space;
-      document.getElementById("viz-legend-normal").style.background = algo.color;
+      document.getElementById("viz-legend-normal").style.background = "var(--purple-bright)";
 
       const warn = document.getElementById("viz-stooge-warning");
       if (algo.maxSize) {
@@ -828,14 +851,26 @@
         : `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> Iniciar`;
 
       const barsContainer = document.getElementById("bars-container");
-      barsContainer.innerHTML = arr.map((val, idx) => {
+      if (barsContainer.children.length !== arr.length) {
+        barsContainer.innerHTML = arr.map(() =>
+          '<div class="bar-wrapper"><div class="sort-bar"></div></div>'
+        ).join("");
+      }
+
+      arr.forEach((val, idx) => {
         const h = Math.max(4, (val / maxVal) * 94);
         let cls = "sort-bar";
         if (step.sorted.includes(idx)) cls += " bar-sorted";
         else if (step.swapping.includes(idx)) cls += " bar-swapping";
         else if (step.comparing.includes(idx)) cls += " bar-comparing";
-        return `<div class="bar-wrapper" title="${val}"><div class="${cls}" style="height:${h}%"></div></div>`;
-      }).join("");
+        const wrapper = barsContainer.children[idx];
+        const bar = wrapper.firstElementChild;
+        wrapper.title = val;
+        bar.className = cls;
+        bar.style.height = `${h}%`;
+      });
+
+      if (step.swapping.length === 2) animateBarSwap(step.swapping[0], step.swapping[1]);
 
       const sourceStatus = document.getElementById("source-status");
       sourceStatus.textContent = isGenerating
@@ -952,9 +987,9 @@
     }
 
     function handleSpeedChange(val) {
-      speed = 510 - Number(val);
+      speed = Math.max(2, 1002 - Number(val));
       document.getElementById("slider-speed-label").textContent =
-        speed < 50 ? "⚡ Rápido" : speed < 150 ? "Normal" : "🐢 Lento";
+        speed < 12 ? "Máxima" : speed < 50 ? "Rápido" : speed < 150 ? "Normal" : "Lento";
       if (isPlaying) {
         stopPlaying();
         startPlaying();
