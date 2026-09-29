@@ -504,7 +504,7 @@
       renderScenarioChart(null);
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/benchmark`);
+        const response = await fetch('https://code-lace-rep.onrender.com/api/benchmark');
         if (!response.ok) throw new Error("No se pudo completar el benchmark.");
         const result = await response.json();
         if (requestId !== benchmarkRequest) return;
